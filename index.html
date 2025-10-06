@@ -39,7 +39,9 @@
             try {
                 const response = await fetch(APPS_SCRIPT_ENDPOINT, {
                     method: 'POST',
-                    contentType: 'application/json',
+                    headers: {
+                        'Content-Type': 'application/json' // THỬ THÊM DÒNG NÀY
+                    },
                     body: JSON.stringify({ cauHoi, traLoi })
                 });
 
@@ -67,4 +69,5 @@
     </script>
 
 </body>
+
 </html>
