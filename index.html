@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Hệ thống Chấm điểm Vấn đáp</title>
+</head>
+<body>
+
+    <h1>Chấm Điểm Vấn Đáp An toàn Điện</h1>
+    
+    <label for="cauHoi">Câu Hỏi:</label>
+    <textarea id="cauHoi" rows="3" cols="60" placeholder="Ví dụ: Anh hãy nêu những quy định chung..."></textarea>
+    <br><br>
+
+    <label for="traLoi">Câu Trả Lời của Thí Sinh:</label>
+    <textarea id="traLoi" rows="10" cols="60" placeholder="Nhập câu trả lời tự luận của thí sinh vào đây..."></textarea>
+    <br><br>
+
+    <button onclick="chamDiem()">Chấm Điểm và Nhận Xét</button>
+
+    <h2>Kết Quả:</h2>
+    <pre id="ketQua"></pre>
+
+    <script>
+        // THAY THẾ bằng URL Web App Apps Script của bạn
+        const APPS_SCRIPT_ENDPOINT = "https://script.google.com/macros/s/AKfycbxs0BolA07lwlNHnUPhjkIozf0B9Vge3MMzTv7LBl9eG8zv265qZyy_0mGryTQE420/exec";
+
+        async function chamDiem() {
+            const cauHoi = document.getElementById('cauHoi').value;
+            const traLoi = document.getElementById('traLoi').value;
+            const ketQuaElement = document.getElementById('ketQua');
+
+            if (!cauHoi || !traLoi) {
+                ketQuaElement.textContent = "Vui lòng nhập đầy đủ Câu hỏi và Câu trả lời.";
+                return;
+            }
+
+            ketQuaElement.textContent = "Đang xử lý, vui lòng chờ...";
+
+            try {
+                const response = await fetch(APPS_SCRIPT_ENDPOINT, {
+                    method: 'POST',
+                    contentType: 'application/json',
+                    body: JSON.stringify({ cauHoi, traLoi })
+                });
+
+                if (!response.ok) {
+                    ketQuaElement.textContent = `Lỗi HTTP: ${response.status} - Không thể kết nối đến máy chủ Apps Script.`;
+                    return;
+                }
+
+                // Nhận JSON từ Apps Script (chính là JSON do Gemini trả về)
+                const result = await response.json(); 
+                
+                if (result.error) {
+                    ketQuaElement.textContent = 'Lỗi Backend: ' + result.error;
+                } else {
+                    ketQuaElement.innerHTML = `
+                        <strong>Điểm Số:</strong> ${result.diem_so} / 10<br><br>
+                        <strong>Nhận Xét Chi Tiết:</strong><br> ${result.nhan_xet_chi_tiet}
+                    `;
+                }
+
+            } catch (error) {
+                ketQuaElement.textContent = 'Lỗi kết nối mạng: ' + error;
+            }
+        }
+    </script>
+
+</body>
+</html>
